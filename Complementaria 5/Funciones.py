@@ -1,24 +1,25 @@
-#Script donde se llevaran a cabo todas las funciones
+# Script donde se llevaran a cabo todas las funciones
 
-#Librerías que vamos a utilizar
-## Recuerde hacer pip install en el cmd si no ha instalado alguna de ellas
+# Librerías que vamos a utilizar
+# Recuerde emplear pip install en una terminal si no ha instalado alguna de ellas
 import pandas as pd
 import numpy as np
 
 from scipy.stats import poisson
 from jmarkov.dtmc import dtmc
 
-#Crear la función que realice los procedimientos necesarios.
-#En este caso se busca crear los objetos cadenas de markov para ambas políticas, realizar el análisis transitorio para las 10 semanas y obtener los respectivos costos
-def Shiny_function(tasa):
+# Crear la función que realice los procedimientos necesarios.
+# En este caso se busca crear los objetos cadenas de markov para ambas políticas, 
+# realizar el análisis transitorio para las 10 semanas y obtener los respectivos costos
+def dash_function(tasa):
     
-    #Crear los estados
+    # Crear los estados
     estados = range(23)
 
-    #*****Crear y llenar la matriz P de la política actual*****
+    # Crear y llenar la matriz P de la política actual 
     matrizP = np.zeros((len(estados), len(estados)), dtype = float)
 
-    #Para la Política Actual -> si i<=10 solicita 12 resmas
+    # Para la Política Actual -> si i<=10 solicita 12 resmas
     for i in estados:
         for j in estados:
             if i<=10 and j>0:
@@ -31,10 +32,10 @@ def Shiny_function(tasa):
                 matrizP[i,j] = poisson.sf(i-1, tasa)
 
     
-    #*****Crear y llenar la matriz P para el caso de la Política Nueva*****
+    # Crear y llenar la matriz P para el caso de la Política Nueva
     matrizPNueva = np.zeros((len(estados), len(estados)), dtype = float)
     
-    #Para la nueva Política  -> solicitar hasta la capacidad máxima
+    # Para la nueva Política  -> solicitar hasta la capacidad máxima
     for i in estados:
         for j in estados:
             if j>0:
@@ -42,24 +43,24 @@ def Shiny_function(tasa):
             elif j==0:
                 matrizPNueva[i,j]=poisson.sf(21, tasa)
 
-    #*****Crear las dos cadenas usando el paquete jmarkov*****
-    #Política Actual
+    # Crear las dos cadenas usando el paquete jmarkov
+    # Política Actual
     politica_Actual = dtmc(matrizP)
-    #Política Nueva
+    # Política Nueva
     politica_Nueva = dtmc(matrizPNueva)
 
-    #Valor de los costos de inventario y de ordenar
+    # Valor de los costos de inventario y de ordenar
     cInventario = 6200
     cOrdenar = 38000
 
-    #******Estimar los costos para las próximas 10 semanas
-    #Definir vector de estado inicial dado que al final de esta semana quedaron cero unidades en inventario
+    # Estimar los costos para las próximas 10 semanas
+    # Definir vector de estado inicial dado que al final de esta semana quedaron cero unidades en inventario
     alfa = np.zeros(len(estados))
     alfa[0] = 1
 
-    #calcula el vector de costos de la política actual 
+    # Calcula el vector de costos de la política actual 
     cost_Sem_Pactual = []
-    #Calcula el costo de inventario y el costo de ordenar promedio de la política actual
+    # Calcula el costo de inventario y el costo de ordenar promedio de la política actual
     cost_inv_Pactual = []
     cost_ord_Pactual = []
 
@@ -74,9 +75,9 @@ def Shiny_function(tasa):
     print(cost_ord_Pactual)
     cost_Sem_Pactual = np.add(cost_inv_Pactual, cost_ord_Pactual)
 
-    #calcula el vector de costos de la política nueva
+    # Calcula el vector de costos de la política nueva
     cost_Sem_Pnueva = []
-    #Calcula el costo de inventario y el costo de ordenar promedio de la política nueva
+    # Calcula el costo de inventario y el costo de ordenar promedio de la política nueva
     cost_inv_Pnueva = []
     cost_ord_Pnueva = [] 
     for i in range(1,11):
@@ -87,7 +88,7 @@ def Shiny_function(tasa):
     
     cost_Sem_Pnueva = np.add(cost_inv_Pnueva, cost_ord_Pnueva)
 
-    #vector de numero de semana
+    # Vector de numero de semana
     num_sem = range(1,11)
     data = pd.DataFrame({
         'numero_semana': num_sem,
